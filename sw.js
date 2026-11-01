@@ -2,8 +2,7 @@ const CACHE_NAME = 'street-fit-v1';
 const ASSETS = [
   '/SWAPP/',
   '/SWAPP/index.html',
-  '/SWAPP/manifest.json',
-  // Include your specific css or js files here
+  '/SWAPP/manifest.json'
 ];
 
 // Install Event
@@ -15,7 +14,7 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// Fetch Event (Mandatory requirement for Chrome mobile installation)
+// Fetch Event (Required for mobile install)
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
