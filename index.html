@@ -1,0 +1,509 @@
+<!DOCTYPE html><html lang="en"><head><style></style><style></style></head><body><!DOCTYPE html><html lang="en" class="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Street Workout Tracker</title><script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"><script>tailwind.config={darkMode:"class",theme:{extend:{colors:{brand:{50:"#ecfdf5",100:"#d1fae5",400:"#34d399",500:"#10b981",600:"#059669",700:"#047857"},darkbg:"#061a14",darkcard:"#0b2920",darkborder:"#133e31"},fontFamily:{sans:["Inter","sans-serif"]}}}}</script><style>::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#061a14}::-webkit-scrollbar-thumb{background:#133e31;border-radius:9999px}::-webkit-scrollbar-thumb:hover{background:#1d5443}.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}@keyframes timerPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(.98)}}.timer-active{animation:timerPulse 2s infinite ease-in-out}</style></head><body class="bg-darkbg text-slate-100 font-sans min-h-screen flex flex-col md:flex-row antialiased selection:bg-brand-500 selection:text-white pb-20 md:pb-0"><aside class="hidden md:flex flex-col w-64 bg-[#09221b] border-r border-darkborder p-4 h-screen sticky top-0 z-30"><div class="flex items-center gap-3 px-2 py-3 mb-6"><div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-brand-500/20"><i class="fa-solid fa-dumbbell"></i></div><div><h1 class="font-extrabold text-lg tracking-tight text-white leading-none">STREET FIT</h1><span class="text-xs text-brand-400 font-semibold tracking-wider uppercase">Calisthenics App</span></div></div><nav class="space-y-1.5 flex-1"><button onclick='switchTab("workout")' id="nav-workout" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-brand-400 bg-darkcard border border-brand-500/30"><i class="fa-solid fa-play w-5 text-center"></i><span>Workout</span></button><button onclick='switchTab("routines")' id="nav-routines" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:text-slate-200 hover:bg-darkcard/50"><i class="fa-solid fa-list-check w-5 text-center"></i><span>Routines</span></button><button onclick='switchTab("history")' id="nav-history" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:text-slate-200 hover:bg-darkcard/50"><i class="fa-solid fa-clock-rotate-left w-5 text-center"></i><span>History Log</span></button><button onclick='switchTab("analytics")' id="nav-analytics" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:text-slate-200 hover:bg-darkcard/50"><i class="fa-solid fa-chart-line w-5 text-center"></i><span>Analytics</span></button><button onclick='switchTab("settings")' id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:text-slate-200 hover:bg-darkcard/50"><i class="fa-solid fa-gear w-5 text-center"></i><span>Settings</span></button></nav><div class="bg-darkcard rounded-xl p-3 border border-darkborder mt-auto mb-2"><div class="flex items-center justify-between text-xs text-slate-400 mb-1"><span>Current Streak</span><i class="fa-solid fa-fire text-brand-500"></i></div><div class="text-xl font-bold text-white flex items-baseline gap-1"><span id="sidebar-streak">0</span><span class="text-xs font-normal text-slate-400">Days</span></div></div></aside><header class="md:hidden sticky top-0 bg-[#09221b]/90 backdrop-blur-md border-b border-darkborder p-4 flex items-center justify-between z-30"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-sm"><i class="fa-solid fa-dumbbell"></i></div><h1 class="font-bold text-base text-white tracking-tight">STREET FIT</h1></div><div class="flex items-center gap-2"><div class="bg-darkcard px-2.5 py-1 rounded-lg border border-darkborder flex items-center gap-1.5 text-xs text-slate-300"><i class="fa-solid fa-fire text-brand-500"></i><span id="mobile-streak" class="font-bold">0</span></div></div></header><main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-8 overflow-y-auto"><section id="tab-workout" class="tab-content space-y-6"><div id="workout-selector-view" class="space-y-6"><div><h2 class="text-2xl font-extrabold text-white tracking-tight">Select Workout</h2><p class="text-slate-400 text-sm mt-1">Calendar-optimized routine (Sunday & Monday free days focus)</p></div><div id="routine-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></div><div id="active-workout-view" class="hidden space-y-6"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-darkcard p-4 sm:p-5 rounded-2xl border border-darkborder"><div><span class="text-xs font-bold text-brand-400 tracking-wider uppercase">Active Session</span><h2 id="active-routine-title" class="text-2xl font-black text-white">Upper Day A</h2></div><div class="flex items-center gap-2"><button onclick="finishWorkout()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-950 text-sm"><i class="fa-solid fa-check"></i>Complete Workout</button><button onclick="cancelWorkout()" class="bg-darkcard hover:bg-rose-950 hover:text-rose-400 text-slate-300 font-medium px-3 py-2.5 rounded-xl transition text-sm border border-darkborder"><i class="fa-solid fa-xmark"></i></button></div></div><div id="timer-widget" class="bg-darkcard border border-darkborder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"><div class="flex items-center gap-4 w-full sm:w-auto"><div class="w-12 h-12 rounded-xl bg-darkbg flex items-center justify-center text-brand-400 text-xl font-bold border border-darkborder shrink-0"><i class="fa-solid fa-stopwatch"></i></div><div><div class="text-xs text-slate-400 font-medium">Rest Timer</div><div id="timer-display" class="text-3xl font-black font-mono tracking-wider text-white">00:00</div></div></div><div class="flex items-center gap-2 w-full sm:w-auto justify-end overflow-x-auto no-scrollbar"><button onclick="startTimer(30)" class="bg-darkbg hover:bg-darkborder border border-darkborder px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 transition">30s</button><button onclick="startTimer(60)" class="bg-darkbg hover:bg-darkborder border border-darkborder px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 transition">60s</button><button onclick="startTimer(90)" class="bg-darkbg hover:bg-darkborder border border-darkborder px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 transition">90s</button><button onclick="startTimer(120)" class="bg-darkbg hover:bg-darkborder border border-darkborder px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 transition">120s</button><button onclick="pauseTimer()" id="timer-toggle-btn" class="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-lg text-xs font-bold transition w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-pause"></i></button><button onclick="resetTimer()" class="bg-darkbg hover:bg-darkborder text-slate-300 p-2 rounded-lg text-xs transition w-8 h-8 flex items-center justify-center border border-darkborder"><i class="fa-solid fa-rotate-right"></i></button></div></div><div id="active-exercises-container" class="space-y-6"></div></div></section><section id="tab-routines" class="tab-content hidden space-y-6"><div class="flex items-center justify-between"><div><h2 class="text-2xl font-extrabold text-white tracking-tight">Routine Manager</h2><p class="text-slate-400 text-sm mt-1">Customize your calendar-optimized street workout program.</p></div><button onclick="openAddRoutineModal()" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-4 py-2.5 rounded-xl transition text-sm flex items-center gap-2"><i class="fa-solid fa-plus"></i>New Routine</button></div><div id="routines-editor-list" class="space-y-4"></div></section><section id="tab-history" class="tab-content hidden space-y-6"><div class="flex items-center justify-between"><div><h2 class="text-2xl font-extrabold text-white tracking-tight">Workout History</h2><p class="text-slate-400 text-sm mt-1">Review your completed calisthenics sessions.</p></div><button onclick="clearHistoryLog()" class="text-xs text-rose-400 hover:text-rose-300 bg-rose-950/40 hover:bg-rose-950 border border-rose-900/50 px-3 py-2 rounded-lg transition">Clear Log</button></div><div id="history-list" class="space-y-4"></div></section><section id="tab-analytics" class="tab-content hidden space-y-6"><div><h2 class="text-2xl font-extrabold text-white tracking-tight">Progress & Stats</h2><p class="text-slate-400 text-sm mt-1">Overall workout volume and streak tracking.</p></div><div class="grid grid-cols-2 sm:grid-cols-4 gap-4"><div class="bg-darkcard border border-darkborder p-4 rounded-2xl"><span class="text-xs font-medium text-slate-400">Total Workouts</span><div id="stat-total-workouts" class="text-2xl font-black text-white mt-1">0</div></div><div class="bg-darkcard border border-darkborder p-4 rounded-2xl"><span class="text-xs font-medium text-slate-400">Total Reps Completed</span><div id="stat-total-reps" class="text-2xl font-black text-brand-400 mt-1">0</div></div><div class="bg-darkcard border border-darkborder p-4 rounded-2xl"><span class="text-xs font-medium text-slate-400">Active Streak</span><div id="stat-streak" class="text-2xl font-black text-amber-400 mt-1">0 Days</div></div><div class="bg-darkcard border border-darkborder p-4 rounded-2xl"><span class="text-xs font-medium text-slate-400">Pull-up Reps</span><div id="stat-pullups" class="text-2xl font-black text-emerald-400 mt-1">0</div></div></div><div class="bg-darkcard border border-darkborder rounded-2xl p-5"><h3 class="font-bold text-white mb-3 text-base flex items-center gap-2"><i class="fa-solid fa-fire-flame-curved text-brand-500"></i>Calisthenics Progression Tips</h3><ul class="text-sm text-slate-300 space-y-2 list-disc list-inside leading-relaxed"><li><strong class="text-white">Parallel Dips:</strong>Aim to hit 4 x 6 clean reps before considering adding weighted vest/belt load.</li><li><strong class="text-white">Pull-ups:</strong>Squeeze shoulder blades together at the top of every rep to widen upper lat muscle fibers.</li><li><strong class="text-white">Full Pistol Squats:</strong>Maintain heel ground contact throughout the movement for ankle power.</li><li><strong class="text-white">Decline Push-ups:</strong>Keep your body in a rigid straight plank line without sagging hips.</li></ul></div></section><section id="tab-settings" class="tab-content hidden space-y-6"><div><h2 class="text-2xl font-extrabold text-white tracking-tight">App Settings</h2><p class="text-slate-400 text-sm mt-1">Backup your training logs and manage preferences.</p></div><div class="bg-darkcard border border-darkborder rounded-2xl p-5 space-y-6"><div><h3 class="font-bold text-white mb-1 text-base">Data Backup & Restore</h3><p class="text-xs text-slate-400 mb-4">Export your workouts as JSON or import backup files onto another laptop/phone.</p><div class="flex flex-wrap gap-3"><button onclick="exportData()" class="bg-darkbg hover:bg-darkborder text-white font-medium px-4 py-2 rounded-xl text-sm transition flex items-center gap-2 border border-darkborder"><i class="fa-solid fa-download"></i>Export Local JSON Data</button><label class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-4 py-2 rounded-xl text-sm transition cursor-pointer flex items-center gap-2"><i class="fa-solid fa-upload"></i>Import JSON Data <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)"></label></div></div><hr class="border-darkborder"><div><h3 class="font-bold text-white mb-1 text-base">Reset Standard Routine</h3><p class="text-xs text-slate-400 mb-4">Restore default calendar-optimized Sunday & Monday free-day split.</p><button onclick="resetDefaultRoutines()" class="bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 font-medium px-4 py-2 rounded-xl text-sm transition flex items-center gap-2"><i class="fa-solid fa-rotate-left"></i>Reset Routines to Default</button></div></div></section></main><nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[#09221b]/95 backdrop-blur-lg border-t border-darkborder flex items-center justify-around py-2 px-1 z-40"><button onclick='switchTab("workout")' id="mobile-nav-workout" class="mobile-nav-btn flex flex-col items-center gap-1 text-brand-400 py-1 px-3"><i class="fa-solid fa-play text-lg"></i><span class="text-[10px] font-medium">Workout</span></button><button onclick='switchTab("routines")' id="mobile-nav-routines" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 py-1 px-3"><i class="fa-solid fa-list-check text-lg"></i><span class="text-[10px] font-medium">Routines</span></button><button onclick='switchTab("history")' id="mobile-nav-history" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 py-1 px-3"><i class="fa-solid fa-clock-rotate-left text-lg"></i><span class="text-[10px] font-medium">History</span></button><button onclick='switchTab("analytics")' id="mobile-nav-analytics" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 py-1 px-3"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-[10px] font-medium">Stats</span></button><button onclick='switchTab("settings")' id="mobile-nav-settings" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 py-1 px-3"><i class="fa-solid fa-gear text-lg"></i><span class="text-[10px] font-medium">Settings</span></button></nav><div id="routine-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden"><div class="bg-darkcard border border-darkborder rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"><div class="p-4 border-b border-darkborder flex items-center justify-between"><h3 id="modal-routine-title" class="text-lg font-bold text-white">Create New Routine</h3><button onclick="closeRoutineModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="p-5 space-y-4 overflow-y-auto flex-1"><div><label class="block text-xs font-semibold text-slate-300 mb-1">Routine Title</label><input type="text" id="routine-name-input" placeholder="e.g. Upper Body Focus" class="w-full bg-darkbg border border-darkborder rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"></div><div><label class="block text-xs font-semibold text-slate-300 mb-1">Category Tag</label><select id="routine-category-input" class="w-full bg-darkbg border border-darkborder rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"><option value="Upper">Upper Body</option><option value="Lower">Lower Body</option><option value="Full Body">Full Body</option><option value="Core">Core / Skills</option></select></div><div class="pt-2"><div class="flex items-center justify-between mb-2"><label class="text-xs font-semibold text-slate-300">Exercises</label><button onclick="addModalExerciseRow()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1"><i class="fa-solid fa-plus"></i>Add Exercise</button></div><div id="modal-exercises-container" class="space-y-3"></div></div></div><div class="p-4 border-t border-darkborder flex justify-end gap-3 bg-darkcard/50"><button onclick="closeRoutineModal()" class="px-4 py-2 rounded-xl text-sm text-slate-300 hover:bg-darkbg font-medium transition">Cancel</button><button onclick="saveModalRoutine()" class="px-4 py-2 rounded-xl text-sm bg-brand-600 hover:bg-brand-500 text-white font-bold transition">Save Routine</button></div></div></div><script>// CALENDAR-OPTIMIZED DEFAULT ROUTINES (SUNDAY & MONDAY FREE DAYS FOCUS)
+        const DEFAULT_ROUTINES = [
+            {
+                id: 'sun_upper_a',
+                name: 'Upper Day A (Sunday - Free Day)',
+                category: 'Upper',
+                exercises: [
+                    { name: 'Pull-ups', targetSets: 4, targetReps: '6-8', restSec: 90 },
+                    { name: 'Parallel Bar Dips', targetSets: 4, targetReps: '3-5', restSec: 120 },
+                    { name: 'Australian Rows', targetSets: 3, targetReps: '10-12', restSec: 90 }
+                ]
+            },
+            {
+                id: 'mon_lower_a',
+                name: 'Lower Day A (Monday - Free Day)',
+                category: 'Lower',
+                exercises: [
+                    { name: 'Bulgarian Split Squats', targetSets: 4, targetReps: '10/leg', restSec: 90 },
+                    { name: 'Jump Squats', targetSets: 3, targetReps: '12-15', restSec: 60 },
+                    { name: 'Hanging Leg Raises', targetSets: 3, targetReps: '10-12', restSec: 60 }
+                ]
+            },
+            {
+                id: 'thu_upper_b',
+                name: 'Upper Day B (Thursday)',
+                category: 'Upper',
+                exercises: [
+                    { name: 'Pull-ups', targetSets: 4, targetReps: '6-8', restSec: 90 },
+                    { name: 'Decline Push-ups', targetSets: 4, targetReps: '8-12', restSec: 90 },
+                    { name: 'Dips Progression', targetSets: 3, targetReps: '3-5', restSec: 120 }
+                ]
+            },
+            {
+                id: 'fri_lower_b',
+                name: 'Lower Day B (Friday)',
+                category: 'Lower',
+                exercises: [
+                    { name: 'Full Pistol Squats', targetSets: 3, targetReps: '5-8/leg', restSec: 120 },
+                    { name: 'Calf Raises', targetSets: 4, targetReps: '15-20', restSec: 60 },
+                    { name: 'Plank Finisher', targetSets: 3, targetReps: '60s', restSec: 60 }
+                ]
+            }
+        ];
+
+        let routines = [];
+        let historyLog = [];
+        let activeWorkout = null;
+        let timerInterval = null;
+        let timerSecondsLeft = 0;
+        let isTimerRunning = false;
+        let editingRoutineId = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            renderRoutineCards();
+            renderRoutinesEditor();
+            renderHistoryLog();
+            updateAnalyticsStats();
+        });
+
+        function loadFromLocalStorage() {
+            const savedRoutines = localStorage.getItem('streetfit_routines');
+            const savedHistory = localStorage.getItem('streetfit_history');
+            routines = savedRoutines ? JSON.parse(savedRoutines) : DEFAULT_ROUTINES;
+            historyLog = savedHistory ? JSON.parse(savedHistory) : [];
+            if (!savedRoutines) saveRoutinesToStorage();
+        }
+
+        function saveRoutinesToStorage() { localStorage.setItem('streetfit_routines', JSON.stringify(routines)); }
+        function saveHistoryToStorage() { localStorage.setItem('streetfit_history', JSON.stringify(historyLog)); }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-brand-400', 'bg-darkcard', 'border', 'border-brand-500/30');
+                btn.classList.add('text-slate-400');
+            });
+            const activeDesktopNav = document.getElementById(`nav-${tabId}`);
+            if (activeDesktopNav) {
+                activeDesktopNav.classList.remove('text-slate-400');
+                activeDesktopNav.classList.add('text-brand-400', 'bg-darkcard', 'border', 'border-brand-500/30');
+            }
+
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+                btn.classList.remove('text-brand-400');
+                btn.classList.add('text-slate-400');
+            });
+            const activeMobileNav = document.getElementById(`mobile-nav-${tabId}`);
+            if (activeMobileNav) {
+                activeMobileNav.classList.remove('text-slate-400');
+                activeMobileNav.classList.add('text-brand-400');
+            }
+        }
+
+        function renderRoutineCards() {
+            const container = document.getElementById('routine-cards-container');
+            container.innerHTML = '';
+            routines.forEach(routine => {
+                const card = document.createElement('div');
+                card.className = 'bg-darkcard border border-darkborder hover:border-brand-500/50 rounded-2xl p-5 flex flex-col justify-between transition group shadow-md';
+                const exerciseListHTML = routine.exercises.map(e => 
+                    `<li class="text-xs text-slate-300 flex justify-between py-1 border-b border-darkborder last:border-0">
+                        <span>${e.name}</span>
+                        <span class="text-slate-400 font-mono">${e.targetSets} × ${e.targetReps}</span>
+                    </li>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-darkbg border border-darkborder text-brand-400 tracking-wider uppercase">${routine.category}</span>
+                            <span class="text-xs text-slate-400">${routine.exercises.length} Exercises</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-brand-400 transition">${routine.name}</h3>
+                        <ul class="mb-5 space-y-0.5">${exerciseListHTML}</ul>
+                    </div>
+                    <button onclick="startWorkoutSession('${routine.id}')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-lg shadow-brand-900/20">
+                        <i class="fa-solid fa-play text-xs"></i> Start Routine
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function startWorkoutSession(routineId) {
+            const routine = routines.find(r => r.id === routineId);
+            if (!routine) return;
+            activeWorkout = {
+                routineId: routine.id,
+                routineName: routine.name,
+                startTime: new Date().toISOString(),
+                exercises: routine.exercises.map(e => ({
+                    name: e.name,
+                    targetSets: e.targetSets,
+                    targetReps: e.targetReps,
+                    restSec: e.restSec,
+                    sets: Array.from({ length: e.targetSets }, () => ({
+                        completed: false,
+                        repsLogged: parseInt(e.targetReps) || 8,
+                        weightNotes: ''
+                    }))
+                }))
+            };
+            document.getElementById('active-routine-title').innerText = routine.name;
+            document.getElementById('workout-selector-view').classList.add('hidden');
+            document.getElementById('active-workout-view').classList.remove('hidden');
+            renderActiveExercises();
+        }
+
+        function renderActiveExercises() {
+            const container = document.getElementById('active-exercises-container');
+            container.innerHTML = '';
+            activeWorkout.exercises.forEach((ex, exIdx) => {
+                const exCard = document.createElement('div');
+                exCard.className = 'bg-darkcard border border-darkborder rounded-2xl p-4 sm:p-5 shadow-lg';
+                let setsRowsHTML = ex.sets.map((set, setIdx) => `
+                    <div class="flex items-center gap-2 sm:gap-4 py-2 border-b border-darkborder last:border-0">
+                        <span class="w-12 text-xs font-bold text-slate-400">Set ${setIdx + 1}</span>
+                        <div class="flex-1 flex items-center gap-2">
+                            <label class="text-[10px] text-slate-400">Reps:</label>
+                            <input type="number" value="${set.repsLogged}" onchange="updateSetReps(${exIdx}, ${setIdx}, this.value)"
+                                class="w-16 bg-darkbg border border-darkborder rounded-lg px-2 py-1 text-center text-sm font-bold text-white focus:outline-none focus:border-brand-500">
+                        </div>
+                        <div class="flex-1 hidden sm:flex items-center gap-2">
+                            <label class="text-[10px] text-slate-400">Notes:</label>
+                            <input type="text" placeholder="e.g. clean form" value="${set.weightNotes}" onchange="updateSetNotes(${exIdx}, ${setIdx}, this.value)"
+                                class="w-full bg-darkbg border border-darkborder rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-brand-500">
+                        </div>
+                        <button onclick="toggleSetComplete(${exIdx}, ${setIdx}, ${ex.restSec})" 
+                            class="w-10 h-10 rounded-xl flex items-center justify-center transition ${set.completed ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950' : 'bg-darkbg border border-darkborder text-slate-500 hover:text-white'}">
+                            <i class="fa-solid fa-check text-sm"></i>
+                        </button>
+                    </div>
+                `).join('');
+                exCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-base text-white flex items-center gap-2">
+                            <i class="fa-solid fa-dumbbell text-brand-400 text-sm"></i> ${ex.name}
+                        </h4>
+                        <span class="text-xs text-slate-400 bg-darkbg border border-darkborder px-2.5 py-1 rounded-lg">Target: ${ex.targetReps} reps</span>
+                    </div>
+                    <div class="space-y-1">${setsRowsHTML}</div>
+                `;
+                container.appendChild(exCard);
+            });
+        }
+
+        function updateSetReps(exIdx, setIdx, val) { if (activeWorkout) activeWorkout.exercises[exIdx].sets[setIdx].repsLogged = parseInt(val) || 0; }
+        function updateSetNotes(exIdx, setIdx, val) { if (activeWorkout) activeWorkout.exercises[exIdx].sets[setIdx].weightNotes = val; }
+
+        function toggleSetComplete(exIdx, setIdx, restSec) {
+            if (!activeWorkout) return;
+            const set = activeWorkout.exercises[exIdx].sets[setIdx];
+            set.completed = !set.completed;
+            if (set.completed) startTimer(restSec || 90);
+            renderActiveExercises();
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timerSecondsLeft = seconds;
+            isTimerRunning = true;
+            updateTimerDisplay();
+            document.getElementById('timer-widget').classList.add('timer-active', 'border-brand-500/50');
+            document.getElementById('timer-toggle-btn').innerHTML = '<i class="fa-solid fa-pause"></i>';
+            timerInterval = setInterval(() => {
+                if (timerSecondsLeft > 0) {
+                    timerSecondsLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    document.getElementById('timer-widget').classList.remove('timer-active', 'border-brand-500/50');
+                    playTimerBeep();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                document.getElementById('timer-toggle-btn').innerHTML = '<i class="fa-solid fa-play"></i>';
+            } else if (timerSecondsLeft > 0) {
+                startTimer(timerSecondsLeft);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSecondsLeft = 0;
+            updateTimerDisplay();
+            document.getElementById('timer-widget').classList.remove('timer-active', 'border-brand-500/50');
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSecondsLeft / 60);
+            const secs = timerSecondsLeft % 60;
+            document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function playTimerBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+                if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+            } catch (e) {}
+        }
+
+        function finishWorkout() {
+            if (!activeWorkout) return;
+            let totalReps = 0;
+            activeWorkout.exercises.forEach(ex => {
+                ex.sets.forEach(s => { if (s.completed) totalReps += parseInt(s.repsLogged) || 0; });
+            });
+            const completedSession = {
+                id: 'log_' + Date.now(),
+                routineName: activeWorkout.routineName,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                timestamp: Date.now(),
+                totalReps: totalReps,
+                exercises: activeWorkout.exercises
+            };
+            historyLog.unshift(completedSession);
+            saveHistoryToStorage();
+            activeWorkout = null;
+            resetTimer();
+            document.getElementById('active-workout-view').classList.add('hidden');
+            document.getElementById('workout-selector-view').classList.remove('hidden');
+            renderHistoryLog();
+            updateAnalyticsStats();
+            switchTab('history');
+        }
+
+        function cancelWorkout() {
+            if (confirm('Are you sure you want to cancel this active workout session?')) {
+                activeWorkout = null;
+                resetTimer();
+                document.getElementById('active-workout-view').classList.add('hidden');
+                document.getElementById('workout-selector-view').classList.remove('hidden');
+            }
+        }
+
+        function renderRoutinesEditor() {
+            const container = document.getElementById('routines-editor-list');
+            container.innerHTML = '';
+            routines.forEach(routine => {
+                const item = document.createElement('div');
+                item.className = 'bg-darkcard border border-darkborder rounded-2xl p-4 flex items-center justify-between';
+                item.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-bold text-white text-base">${routine.name}</h4>
+                            <span class="text-[10px] bg-darkbg border border-darkborder text-slate-400 px-2 py-0.5 rounded">${routine.category}</span>
+                        </div>
+                        <p class="text-xs text-slate-400">${routine.exercises.length} exercises configured</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openEditRoutineModal('${routine.id}')" class="p-2 bg-darkbg hover:bg-darkborder text-slate-200 rounded-xl transition text-xs border border-darkborder"><i class="fa-solid fa-pen"></i> Edit</button>
+                        <button onclick="deleteRoutine('${routine.id}')" class="p-2 bg-rose-950/50 hover:bg-rose-900 text-rose-300 rounded-xl transition text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function openAddRoutineModal() {
+            editingRoutineId = null;
+            document.getElementById('modal-routine-title').innerText = 'Create New Routine';
+            document.getElementById('routine-name-input').value = '';
+            document.getElementById('modal-exercises-container').innerHTML = '';
+            addModalExerciseRow();
+            document.getElementById('routine-modal').classList.remove('hidden');
+        }
+
+        function openEditRoutineModal(routineId) {
+            const routine = routines.find(r => r.id === routineId);
+            if (!routine) return;
+            editingRoutineId = routine.id;
+            document.getElementById('modal-routine-title').innerText = 'Edit Routine';
+            document.getElementById('routine-name-input').value = routine.name;
+            document.getElementById('routine-category-input').value = routine.category;
+            const container = document.getElementById('modal-exercises-container');
+            container.innerHTML = '';
+            routine.exercises.forEach(ex => addModalExerciseRow(ex.name, ex.targetSets, ex.targetReps, ex.restSec));
+            document.getElementById('routine-modal').classList.remove('hidden');
+        }
+
+        function addModalExerciseRow(name = '', sets = 4, reps = '8-10', rest = 90) {
+            const container = document.getElementById('modal-exercises-container');
+            const row = document.createElement('div');
+            row.className = 'modal-ex-row bg-darkbg p-3 rounded-xl border border-darkborder space-y-2';
+            row.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <input type="text" placeholder="Exercise Name" value="${name}" class="ex-name flex-1 bg-darkcard border border-darkborder rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500">
+                    <button onclick="this.closest('.modal-ex-row').remove()" class="text-slate-500 hover:text-rose-400 p-1"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">Sets</label>
+                        <input type="number" value="${sets}" class="ex-sets w-full bg-darkcard border border-darkborder rounded-lg px-2 py-1 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">Target Reps</label>
+                        <input type="text" value="${reps}" class="ex-reps w-full bg-darkcard border border-darkborder rounded-lg px-2 py-1 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">Rest (sec)</label>
+                        <input type="number" value="${rest}" class="ex-rest w-full bg-darkcard border border-darkborder rounded-lg px-2 py-1 text-xs text-white">
+                    </div>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function closeRoutineModal() { document.getElementById('routine-modal').classList.add('hidden'); }
+
+        function saveModalRoutine() {
+            const name = document.getElementById('routine-name-input').value.trim();
+            const category = document.getElementById('routine-category-input').value;
+            if (!name) return alert('Please enter a routine title');
+            const exerciseRows = document.querySelectorAll('.modal-ex-row');
+            const exercises = [];
+            exerciseRows.forEach(row => {
+                const exName = row.querySelector('.ex-name').value.trim();
+                const exSets = parseInt(row.querySelector('.ex-sets').value) || 3;
+                const exReps = row.querySelector('.ex-reps').value.trim() || '8-10';
+                const exRest = parseInt(row.querySelector('.ex-rest').value) || 90;
+                if (exName) exercises.push({ name: exName, targetSets: exSets, targetReps: exReps, restSec: exRest });
+            });
+            if (exercises.length === 0) return alert('Please add at least one exercise.');
+            if (editingRoutineId) {
+                const idx = routines.findIndex(r => r.id === editingRoutineId);
+                if (idx !== -1) routines[idx] = { id: editingRoutineId, name, category, exercises };
+            } else {
+                routines.push({ id: 'routine_' + Date.now(), name, category, exercises });
+            }
+            saveRoutinesToStorage();
+            renderRoutineCards();
+            renderRoutinesEditor();
+            closeRoutineModal();
+        }
+
+        function deleteRoutine(routineId) {
+            if (confirm('Are you sure you want to delete this routine?')) {
+                routines = routines.filter(r => r.id !== routineId);
+                saveRoutinesToStorage();
+                renderRoutineCards();
+                renderRoutinesEditor();
+            }
+        }
+
+        function renderHistoryLog() {
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+            if (historyLog.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-darkcard rounded-2xl border border-darkborder">
+                        <i class="fa-solid fa-clipboard-list text-3xl text-slate-600 mb-2"></i>
+                        <p class="text-slate-400 text-sm">No completed workout history yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            historyLog.forEach(log => {
+                const card = document.createElement('div');
+                card.className = 'bg-darkcard border border-darkborder rounded-2xl p-4 sm:p-5 space-y-3';
+                const exSummary = log.exercises.map(ex => {
+                    const completedSets = ex.sets.filter(s => s.completed).length;
+                    return `<span class="inline-block bg-darkbg border border-darkborder text-slate-300 text-xs px-2.5 py-1 rounded-lg">${ex.name}: ${completedSets}/${ex.targetSets} sets</span>`;
+                }).join(' ');
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-darkborder pb-3">
+                        <div>
+                            <h4 class="font-bold text-white text-base">${log.routineName}</h4>
+                            <span class="text-xs text-slate-400">${log.date}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400">Total Volume</span>
+                            <div class="font-black text-brand-400 text-base">${log.totalReps} Reps</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 pt-1">${exSummary}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function clearHistoryLog() {
+            if (confirm('Are you sure you want to clear all workout history logs?')) {
+                historyLog = [];
+                saveHistoryToStorage();
+                renderHistoryLog();
+                updateAnalyticsStats();
+            }
+        }
+
+        function updateAnalyticsStats() {
+            const totalWorkouts = historyLog.length;
+            let totalReps = 0;
+            let totalPullups = 0;
+            historyLog.forEach(log => {
+                totalReps += log.totalReps || 0;
+                log.exercises.forEach(ex => {
+                    if (ex.name.toLowerCase().includes('pull-up') || ex.name.toLowerCase().includes('pull up')) {
+                        ex.sets.forEach(s => { if (s.completed) totalPullups += parseInt(s.repsLogged) || 0; });
+                    }
+                });
+            });
+            let streak = historyLog.length > 0 ? [...new Set(historyLog.map(l => new Date(l.timestamp).toDateString()))].length : 0;
+            document.getElementById('stat-total-workouts').innerText = totalWorkouts;
+            document.getElementById('stat-total-reps').innerText = totalReps;
+            document.getElementById('stat-streak').innerText = `${streak} Days`;
+            document.getElementById('stat-pullups').innerText = totalPullups;
+            document.getElementById('sidebar-streak').innerText = streak;
+            document.getElementById('mobile-streak').innerText = streak;
+        }
+
+        function exportData() {
+            const data = { routines, historyLog };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `street_workout_backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.routines) routines = parsed.routines;
+                    if (parsed.historyLog) historyLog = parsed.historyLog;
+                    saveRoutinesToStorage();
+                    saveHistoryToStorage();
+                    renderRoutineCards();
+                    renderRoutinesEditor();
+                    renderHistoryLog();
+                    updateAnalyticsStats();
+                    alert('Workout data imported successfully!');
+                } catch (err) { alert('Invalid JSON file format.'); }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetDefaultRoutines() {
+            if (confirm('Reset routines back to default Sunday & Monday free-day split?')) {
+                routines = DEFAULT_ROUTINES;
+                saveRoutinesToStorage();
+                renderRoutineCards();
+                renderRoutinesEditor();
+            }
+        }</script></body></html><script src="https://unpkg.com/babel-standalone/babel.min.js"></script><script src="https://unpkg.com/react/umd/react.development.js"></script><script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script><script type="text/babel" data-presets="react"></script></body></html>
